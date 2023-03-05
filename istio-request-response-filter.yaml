@@ -1,0 +1,54 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: EnvoyFilter
+metadata:
+  name: request-response-filter
+  namespace: istio-system
+spec:
+  configPatches:
+  - applyTo: HTTP_FILTER
+    match:
+      context: ANY
+      listener:
+        filterChain:
+          filter:
+            name: "envoy.filters.network.http_connection_manager"
+            subFilter:
+              name: "envoy.filters.http.router"
+    patch:
+      operation: INSERT_BEFORE
+      value:
+        name: envoy.lua
+        typed_config:
+            "@type": "type.googleapis.com/envoy.extensions.filters.http.lua.v3.Lua"
+            inlineCode: |
+              function envoy_on_request(request_handle)
+                local headers = request_handle:headers()
+                local headersMap = {}
+                for key, value in pairs(headers) do
+                  headersMap[key] = value
+                end                
+                request_handle:streamInfo():dynamicMetadata():set("envoy.lua","request_headers",headersMap)                    
+                local requestBody = ""
+                for chunk in request_handle:bodyChunks() do
+                  if (chunk:length() > 0) then
+                    requestBody = requestBody .. chunk:getBytes(0, chunk:length())
+                  end
+                end
+                request_handle:streamInfo():dynamicMetadata():set("envoy.lua","request_body",requestBody)                    
+              end
+
+              function envoy_on_response(response_handle)
+                local headers = response_handle:headers()
+                local headersMap = {}
+                for key, value in pairs(headers) do
+                  headersMap[key] = value
+                end                
+                response_handle:streamInfo():dynamicMetadata():set("envoy.lua","response_headers",headersMap)                    
+                local responseBody = ""
+                for chunk in response_handle:bodyChunks() do
+                  if (chunk:length() > 0) then
+                    responseBody = responseBody .. chunk:getBytes(0, chunk:length())
+                  end
+                end
+                response_handle:streamInfo():dynamicMetadata():set("envoy.lua","response_body",responseBody)                    
+              end

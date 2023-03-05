@@ -1,0 +1,25 @@
+  meshConfig:
+    accessLogFile: /dev/stdout
+    accessLogEncoding: JSON
+    accessLogFormat: |
+      {
+        "protocol": "%PROTOCOL%",
+        "method": "%REQ(:METHOD)%",
+        "path": "%REQ(X-ENVOY-ORIGINAL-PATH?:PATH)%",
+        "responseCode": "%RESPONSE_CODE%",
+        "clientDuration": "%DURATION%",
+        "responseCodeDetails": "%RESPONSE_CODE_DETAILS%",
+        "connectionTerminationDetails": "%CONNECTION_TERMINATION_DETAILS%",
+        "targetDuration": "%RESPONSE_DURATION%",
+        "upstreamName": "%UPSTREAM_CLUSTER%",
+        "traceId": "%REQ(X-B3-Traceid)%",
+        "responseFlags": "%RESPONSE_FLAGS%",
+        "routeName": "%ROUTE_NAME%",
+        "downstreamRemoteAddress": "%DOWNSTREAM_REMOTE_ADDRESS%",
+        "upstreamHost": "%UPSTREAM_HOST%",
+        "downstreamLocalURISan": "%DOWNSTREAM_LOCAL_URI_SAN%",
+        "requestHeaders": "%DYNAMIC_METADATA(envoy.lua:request_headers)%",
+        "requestBody": "%DYNAMIC_METADATA(envoy.lua:request_body)%",
+        "responseHeaders": "%DYNAMIC_METADATA(envoy.lua:response_headers)%",
+        "responseBody": "%DYNAMIC_METADATA(envoy.lua:response_body)%"
+      }
